@@ -1,0 +1,57 @@
+# Invoice extraction schema hints
+# These descriptions are injected into the LLM prompt to improve extraction quality.
+
+context: >
+  B2B invoice document — a vendor billing a customer for goods or services.
+  Common in accounts payable (AP) processing workflows.
+
+fields:
+  invoice_number: >
+    Unique identifier assigned by the vendor. Often formatted as INV-YYYY-NNNN,
+    YYYY/NNN, or similar. Look for labels like "Invoice No", "Invoice Number",
+    "Rechnungsnummer" (German), "Factura No" (Spanish).
+  purchase_order_number: >
+    Reference to the customer's purchase order that authorised this invoice.
+    Labels: "PO Number", "PO No", "Order Reference", "Ref: PO-..."
+  invoice_date: >
+    Date the invoice was issued by the vendor. ISO 8601 format (YYYY-MM-DD).
+    Labels: "Invoice Date", "Date", "Rechnungsdatum".
+  due_date: >
+    Date by which payment must be made. May be calculated from invoice_date
+    + payment_terms (e.g., Net 30 = 30 days after invoice_date). Extract the
+    explicit date if present; do NOT calculate it.
+  vendor_name: >
+    Legal name of the company issuing the invoice (the seller/supplier).
+  vendor_address: >
+    Full postal address of the vendor. Include street, city, postcode, country.
+  vendor_tax_id: >
+    VAT registration number or tax identification number of the vendor.
+    Formats vary by country: DE followed by 9 digits (Germany), GB followed
+    by 9 digits (UK), etc. Labels: "VAT No", "Tax ID", "USt-IdNr".
+  customer_name: >
+    Legal name of the company being billed (the buyer/customer).
+  customer_address: >
+    Full postal address of the customer.
+  subtotal: >
+    Amount before tax. Labels: "Subtotal", "Net Amount", "Nettobetrag".
+    Always a positive number.
+  tax_amount: >
+    Tax charged (VAT, GST, sales tax). Always a positive number.
+    Labels: "VAT", "Tax", "MwSt", "GST".
+  tax_rate_percent: >
+    The tax rate as a percentage (e.g., 19 for 19% German VAT). Extract the
+    numeric value only, not the % symbol.
+  total_amount: >
+    Grand total including all taxes and discounts. This is what the customer
+    must pay. Labels: "Total", "Amount Due", "Grand Total", "Gesamtbetrag".
+    Always a positive number.
+  currency: >
+    ISO 4217 three-letter currency code. Examples: EUR, USD, GBP, CHF, SEK.
+    Convert written currency names: "Euro" → "EUR", "Dollar" → "USD".
+  payment_terms: >
+    Description of when payment is due. Examples: "Net 30", "30 days",
+    "Due on receipt", "2/10 Net 30" (2% discount if paid within 10 days).
+  iban: >
+    International Bank Account Number for wire transfer payment.
+    Format: 2-letter country code + 2 check digits + up to 30 alphanumeric chars.
+    Often written with spaces for readability (e.g., DE89 3704 0044 0532 0130 00).

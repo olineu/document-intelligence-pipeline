@@ -1,0 +1,54 @@
+# Logistics document extraction schema hints
+# Covers: Bills of Lading, Delivery Notes, Shipping Manifests
+
+context: >
+  Logistics document — covers the transport of goods from origin to destination.
+  Common document types: Bill of Lading (BOL), Delivery Note, Shipping Manifest,
+  Airway Bill (AWB), Sea Waybill. Used in supply chain, 3PL, and customs workflows.
+
+fields:
+  document_type: >
+    Type of logistics document. Standardise to one of:
+    "bill_of_lading", "delivery_note", "shipping_manifest", "airway_bill", "sea_waybill".
+    A "Bill of Lading" or "B/L" → "bill_of_lading".
+    A "Delivery Note" or "DN" → "delivery_note".
+  document_number: >
+    Unique document identifier. Labels: "B/L No", "BOL Number", "AWB No",
+    "Delivery Note No", "Reference Number".
+  shipment_date: >
+    Date goods were shipped / loaded. ISO 8601 format.
+    Labels: "Date of Shipment", "Loading Date", "ETD" (Estimated Time of Departure).
+  estimated_arrival: >
+    Expected arrival date at destination. ISO 8601 format.
+    Labels: "ETA", "Estimated Arrival", "Expected Delivery Date".
+  shipper_name: >
+    Company or person sending the goods (the exporter/seller).
+    Labels: "Shipper", "Consignor", "Sender", "Exporter".
+  consignee_name: >
+    Company or person receiving the goods (the importer/buyer).
+    Labels: "Consignee", "Receiver", "Notify Party" (if only notify party listed).
+  carrier_name: >
+    Shipping line, airline, or trucking company transporting the goods.
+    Labels: "Carrier", "Shipping Line", "Airline".
+  port_of_loading: >
+    Port where goods were loaded onto the vessel/aircraft.
+    Labels: "Port of Loading", "POL", "Origin Port", "Place of Receipt".
+  port_of_discharge: >
+    Port where goods will be unloaded.
+    Labels: "Port of Discharge", "POD", "Destination Port".
+  vessel_name: >
+    Name of the ship or aircraft. For trucks, may be the vehicle registration.
+    Labels: "Vessel", "Ship Name", "Flight No", "Truck No".
+  container_number: >
+    ISO container number format: 4-letter prefix + 6 digits + 1 check digit.
+    Example: MSCU 123456 7, TCKU1234567.
+    Labels: "Container No", "Container Number", "CNTR".
+  total_weight_kg: >
+    Total gross weight of all cargo in kilograms.
+    Convert if needed: 1 metric ton = 1000 kg.
+  freight_terms: >
+    Who pays for freight. Standardise to: "prepaid" (seller pays) or "collect" (buyer pays).
+    Labels: "Freight Terms", "Freight Charges", "Incoterms reference".
+  booking_number: >
+    Shipping line booking reference number.
+    Labels: "Booking No", "Booking Reference", "Booking Confirmation".
