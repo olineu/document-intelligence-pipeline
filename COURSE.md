@@ -159,9 +159,105 @@ curl http://localhost:8000/documents/{id}/status
 
 ---
 
+## Lesson 07 — Vision LLM as OCR
+
+**Folder:** `lessons/07_vision_ocr/`
+
+**The problem:** Tesseract OCR (Lesson 01's fallback) was state-of-the-art in 2015. It fails on complex layouts, multi-column text, tables within images, and non-standard fonts. Vision Language Models (VLMs) read page images the same way a human does — and they're dramatically better.
+
+**What you'll learn:**
+- Why Tesseract fails on real-world scanned documents (character segmentation, layout reconstruction)
+- How VLMs approach OCR differently: they see the whole page at once as an image
+- Swapping the `ImageParser` and PDF OCR fallback to use Claude's vision API instead of Tesseract
+- When VLM OCR is worth the cost vs. when Tesseract is sufficient
+- The `llama-ocr` pattern: fully local OCR with Llama 3.2 Vision (no API cost)
+
+**Run the exercise:**
+```bash
+python lessons/07_vision_ocr/exercise.py
+```
+
+**Key insight:** For clean digital PDFs, text extraction is free and fast — use it. For anything scanned or image-heavy, VLM OCR is worth the token cost because downstream extraction quality depends entirely on input quality.
+
+**Inspired by:** `llama-ocr`, `gemma3-ocr`, `qwen-2.5VL-ocr` in [ai-engineering-hub](https://github.com/patchy631/ai-engineering-hub)
+
+---
+
+## Lesson 08 — Semantic Document Parsing with Dockling
+
+**Folder:** `lessons/08_dockling/`
+
+**The problem:** All parsers so far produce raw text — a flat string. But documents have structure: a heading means something different than body text; a table cell means something different than a paragraph. Feeding flat text to the extractor throws this structure away.
+
+**What you'll learn:**
+- What IBM's [Dockling](https://github.com/DS4SD/docling) library produces: a semantic document model — headers, paragraphs, tables, figures, and captions as distinct typed objects
+- How to use Dockling as a drop-in replacement for pdfplumber that produces richer input
+- Converting Dockling's `DoclingDocument` into a structured text representation that preserves hierarchy
+- Why semantic structure improves extraction accuracy on complex documents (especially those with multiple sections that use the same field names)
+
+**Run the exercise:**
+```bash
+pip install docling  # separate install — heavy dependency
+python lessons/08_dockling/exercise.py
+```
+
+**Key insight:** The quality of your extraction output is bounded by the quality of your parsing input. Dockling's semantic model is the best open-source document parser available — worth knowing when standard parsers fall short.
+
+**Inspired by:** `rag-with-dockling` in [ai-engineering-hub](https://github.com/patchy631/ai-engineering-hub)
+
+---
+
+## Lesson 09 — Agentic Document Workflows
+
+**Folder:** `lessons/09_agentic_workflow/`
+
+**The problem:** Some documents can't be processed in a single LLM pass. An invoice that references a purchase order needs the PO to validate the line items. A logistics manifest might need to cross-reference a vessel schedule. A contract might need to extract clauses and then apply jurisdiction-specific rules to each clause.
+
+**What you'll learn:**
+- When single-pass extraction is insufficient: multi-document cross-referencing, iterative refinement
+- Building an agent loop over documents: extract → validate → lookup → re-extract if needed
+- The "paralegal agent" pattern: a domain-specific agent that knows the rules for a document type
+- How to use the existing pipeline as a tool within an agent (agents calling extractors)
+- Failure modes: runaway agent loops, cost explosions — and how to bound them
+
+**Run the exercise:**
+```bash
+python lessons/09_agentic_workflow/exercise.py
+```
+
+**Key insight:** Agents add power but also complexity and cost. The rule: use a single extraction pass as the default; escalate to an agent loop only when cross-document validation or multi-step reasoning is required.
+
+**Inspired by:** `agentic_rag_deepseek`, `paralegal-agent-crew` in [ai-engineering-hub](https://github.com/patchy631/ai-engineering-hub)
+
+---
+
+## Lesson 10 — Document Q&A with Source Citations
+
+**Folder:** `lessons/10_document_qa/`
+
+**The problem:** Extraction pulls specific known fields. But sometimes you need to answer arbitrary questions over a document: "What are the liability limits in this contract?" or "Which line items were disputed in this invoice?" This is a RAG problem, not an extraction problem — and citations matter.
+
+**What you'll learn:**
+- The extraction vs. Q&A distinction: when to use which
+- Indexing extracted documents into a vector store for retrieval
+- Generating answers with source citations: which sentence/paragraph supports this answer?
+- Confidence for Q&A: when the answer is "not found in the document" vs. "here it is"
+- Trustworthy RAG: flagging low-confidence answers instead of hallucinating
+
+**Run the exercise:**
+```bash
+python lessons/10_document_qa/exercise.py
+```
+
+**Key insight:** Citation is not optional for enterprise document Q&A. If a user asks "what does the contract say about payment terms?" and gets a wrong answer with no citation, the system is worse than useless — it's actively dangerous. Design for cite-or-abstain from the start.
+
+**Inspired by:** `notebook-lm-clone`, `trustworthy-rag` in [ai-engineering-hub](https://github.com/patchy631/ai-engineering-hub)
+
+---
+
 ## After the Course
 
-Once you've completed all 6 lessons, the next steps are:
+Once you've completed all lessons, the next steps are:
 
 1. **Add a new schema** — pick a document type you encounter at work, write the YAML + Pydantic model, test it end-to-end
 2. **Integrate `model-monitor`** — add drift detection to track when extraction quality degrades over time (see `../model-monitor` in the roadmap)
